@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>勤怠管理システム</title>
+    <!-- パソコン内（staticフォルダ）から読み込む設定 -->
+    <link href="/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<!-- ナビゲーションバー (画面上部の黒い帯) -->
+<nav class="navbar navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1"><i class="bi bi-clock-history me-2"></i>勤怠管理システム</span>
+        <span class="navbar-text text-white">ログイン中: 山田 太郎 さん</span>
+    </div>
+</nav>
+
+<div class="container text-center" style="max-width: 500px;">
+    <!-- 打刻カード -->
+    <div class="card shadow-sm p-4 mb-4 bg-white rounded mt-5">
+        <h2 class="text-secondary mb-3">当日の打刻</h2>
+        <p class="text-success fw-bold" th:text="${message}"></p>
+
+        <!-- 現在時刻の表示エリア (黄色いデジタル時計) -->
+        <div class="p-3 bg-dark text-warning rounded-3 mb-4">
+            <div style="font-size: 0.8rem;" class="text-uppercase text-muted">Current Time</div>
+            <div id="clock" style="font-size: 2.5rem; font-weight: bold; font-family: monospace;">00:00:00</div>
+        </div>
+
+        <!-- ボタンエリア -->
+        <div class="row g-3">
+            <div class="col-6">
+                <form action="/shukkin" method="POST">
+                    <button type="submit" class="btn btn-primary btn-lg w-100 py-3 fw-bold shadow-sm">
+                        出勤
+                    </button>
+                </form>
+            </div>
+            <div class="col-6">
+                <!-- 👈 退勤ボタンをフォーム化し、押せるように変更 -->
+                <form action="/taikin" method="POST">
+                    <button type="submit" class="btn btn-danger btn-lg w-100 py-3 fw-bold shadow-sm">
+                        退勤
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 履歴ページへのリンクボタン -->
+    <button class="btn btn-outline-secondary w-100 py-2 mt-2">
+        <i class="bi bi-list-task me-2"></i>勤務履歴を表示する
+    </button>
+    <!-- データベースから届いた履歴を表示する一覧表 -->
+    <div class="card shadow-sm p-4 mt-4 bg-white rounded">
+        <h4 class="text-secondary mb-3">打刻履歴（データベース内）</h4>
+        <table class="table table-striped table-hover">
+            <thead>
+            <tr>
+                <th>日付</th>
+                <th>出勤時刻</th>
+                <th>退勤時刻</th> <!-- 👈 列を追加 -->
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Javaから届いた履歴リストを、Thymeleafを使って1行ずつ自動で繰り返し表示する仕組み -->
+            <tr th:each="rec : ${historyList}">
+                <td th:text="${rec.date}">2026-08-22</td>
+                <td th:text="${rec.time}">09:00</td>
+                <td th:text="${rec.taikinTime}">18:00</td> <!-- 👈 退勤時刻の表示を追加 -->
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 時計を動かすプログラム -->
+<script>
+    function updateClock() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('ja-JP', { hour12: false });
+        document.getElementById('clock').textContent = timeString;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+</script>
+</body>
+</html>
